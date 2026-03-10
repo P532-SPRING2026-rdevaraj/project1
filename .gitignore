@@ -1,0 +1,17 @@
+# Maven build output
+target/
+
+# macOS metadata
+.DS_Store
+
+# Node modules (frontend dev deps — not needed in repo)
+frontend/node_modules/
+frontend/dist/
+
+# IDE files
+.idea/
+*.iml
+.vscode/
+
+# Environment / secrets
+.env
