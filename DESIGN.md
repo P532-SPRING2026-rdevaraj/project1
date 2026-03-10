@@ -16,7 +16,7 @@
   ┌─────────────┐ ┌───────────┐  ┌───────────────┐  ┌──────────────────────────┐
   │  MarketFeed │ │ Portfolio │  │  OrderService │  │ DashboardNotification    │
   │ (Singleton) │ │(Singleton)│  │  (Singleton,  │  │ Decorator                │
-  │             │ │           │  │  PriceObserver│  │ (Decorator)              │
+  │             │ │           │  │ PriceObserver)│  │ (Decorator)              │
   │ @Scheduled  │ │ cash      │  │               │  └──────────┬───────────────┘
   │ every 5s    │ │ holdings  │  │ pendingOrders │             │ wraps
   │             │ │ trades    │  │               │  ┌──────────▼───────────────┐
