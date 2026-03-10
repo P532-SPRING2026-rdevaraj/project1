@@ -7,8 +7,7 @@ Analysts can place buy/sell orders, monitor a live portfolio, and receive notifi
 
 ## Live Demo
 
-> **Render.com deployment:** _Add your Render URL here after deploying_
-> e.g. `https://tradesimulator-7rir.onrender.com`
+ `https://tradesimulator-7rir.onrender.com`
 
 **Note:** Free-tier Render services spin down after 15 minutes of inactivity and take up to 60 seconds to cold-start.
 
