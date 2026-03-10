@@ -6,21 +6,21 @@
 ## Component Diagram
 
 ```
-┌─────────────────────────────────────────────────────────────────────┐
-│                        REST Layer                                   │
-│                     TradeController                                 │
-│  GET /api/prices  GET /api/portfolio  POST /api/orders  GET /api/notifications │
-└────────┬──────────────┬──────────────────┬──────────────┬──────────┘
+┌─────────────────────────────────────────────────────────────────────────────────┐
+│                        REST Layer                                               │
+│                     TradeController                                             │
+│  GET /api/prices  GET /api/portfolio  POST /api/orders  GET /api/notifications  │
+└────────┬──────────────┬──────────────────┬──────────────┬───────────────────────┘
          │              │                  │              │
          ▼              ▼                  ▼              ▼
-  ┌─────────────┐ ┌───────────┐  ┌──────────────┐ ┌──────────────────────────┐
-  │  MarketFeed │ │ Portfolio │  │  OrderService │ │ DashboardNotification    │
-  │ (Singleton) │ │(Singleton)│  │  (Singleton,  │ │ Decorator                │
-  │             │ │           │  │   PriceObserver│ │ (Decorator)              │
-  │ @Scheduled  │ │ cash      │  │               │ └──────────┬───────────────┘
-  │ every 5s    │ │ holdings  │  │ pendingOrders │            │ wraps
-  │             │ │ trades    │  │               │ ┌──────────▼───────────────┐
-  └──────┬──────┘ └───────────┘  └──────┬────────┘ │ ConsoleNotification     │
+  ┌─────────────┐ ┌───────────┐  ┌───────────────┐  ┌──────────────────────────┐
+  │  MarketFeed │ │ Portfolio │  │  OrderService │  │ DashboardNotification    │
+  │ (Singleton) │ │(Singleton)│  │  (Singleton,  │  │ Decorator                │
+  │             │ │           │  │  PriceObserver│  │ (Decorator)              │
+  │ @Scheduled  │ │ cash      │  │               │  └──────────┬───────────────┘
+  │ every 5s    │ │ holdings  │  │ pendingOrders │             │ wraps
+  │             │ │ trades    │  │               │  ┌──────────▼───────────────┐
+  └──────┬──────┘ └───────────┘  └──────┬────────┘  │ ConsoleNotification      │
          │                              │           │ Service                  │
          │ uses                         │ uses      │ (NotificationService)    │
          ▼                              ▼           └──────────────────────────┘
@@ -31,10 +31,10 @@
   └──────┬───────────┘         └──────┬───────┘
          │ implements                  │ creates
          ▼                             ▼
-  ┌──────────────────┐     ┌──────────┐  ┌────────────┐
+  ┌──────────────────┐     ┌───────────┐  ┌────────────┐
   │ RandomWalk       │     │MarketOrder│  │ LimitOrder │
-  │ Strategy         │     │          │  │            │
-  └──────────────────┘     └──────────┘  └────────────┘
+  │ Strategy         │     │           │  │            │
+  └──────────────────┘     └───────────┘  └────────────┘
          ▲
          │ notifies (Observer)
   ┌──────┴──────┐
