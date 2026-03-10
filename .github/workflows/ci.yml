@@ -38,6 +38,9 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main'
+    environment:
+      name: production
+      url: https://tradesimulator-7rir.onrender.com
     steps:
       - run: |
           curl -X POST ${{ secrets.RENDER_DEPLOY_HOOK }}
