@@ -4,6 +4,7 @@ import com.tradesimulator.model.LimitOrder;
 import com.tradesimulator.model.MarketOrder;
 import com.tradesimulator.model.Order;
 import com.tradesimulator.model.OrderType;
+import com.tradesimulator.order.DefaultOrderFactory;
 import com.tradesimulator.order.OrderFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -21,7 +22,7 @@ class OrderFactoryTest {
     @BeforeEach
     void setUp() {
         // Arrange
-        factory = new OrderFactory();
+        factory = new DefaultOrderFactory();
     }
 
     @Test

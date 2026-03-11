@@ -35,7 +35,8 @@ export default function App() {
         tradesRes.json(),
         notifsRes.json(),
       ])
-      setPrevPrices({ ...prevPricesRef.current })
+      const hasChanged = Object.keys(newPrices).some(k => newPrices[k] !== prevPricesRef.current[k])
+      if (hasChanged) setPrevPrices({ ...prevPricesRef.current })
       prevPricesRef.current = newPrices
       setPrices(newPrices)
       setPortfolio(newPort)

@@ -3,7 +3,12 @@ package com.tradesimulator.market;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Singleton (Spring @Service = singleton scope) that acts as the Observable in the Observer pattern.
@@ -19,7 +24,7 @@ public class MarketFeed {
     private final List<PriceObserver> observers = new ArrayList<>();
     private PriceUpdateStrategy strategy;
 
-    public MarketFeed() {
+    public MarketFeed(PriceUpdateStrategy strategy) {
         prices.put("AAPL",  175.50);
         prices.put("GOOG", 2850.00);
         prices.put("TSLA",  245.30);
@@ -28,7 +33,7 @@ public class MarketFeed {
         prices.put("NVDA",  495.20);
         prices.put("META",  350.10);
 
-        this.strategy = new RandomWalkStrategy(new Random());
+        this.strategy = strategy;
     }
 
     public void setStrategy(PriceUpdateStrategy strategy) {
