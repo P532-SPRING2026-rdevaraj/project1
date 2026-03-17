@@ -97,3 +97,4 @@ The Render deploy hook URL is stored as the GitHub secret `RENDER_DEPLOY_HOOK`.
 - JUnit 5 + Mockito for unit tests
 - GitHub Actions for CI/CD
 - Render.com for deployment
+# Tradechat
