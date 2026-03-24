@@ -14,4 +14,7 @@ public interface PriceUpdateStrategy {
      * @return new ticker -> price map with updated values
      */
     Map<String, Double> updatePrices(Map<String, Double> currentPrices);
+
+    /** Short identifier used by the strategy-selector API (e.g. "random-walk"). */
+    String getName();
 }

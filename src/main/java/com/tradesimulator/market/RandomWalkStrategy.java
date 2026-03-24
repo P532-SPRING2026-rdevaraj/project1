@@ -30,4 +30,9 @@ public class RandomWalkStrategy implements PriceUpdateStrategy {
         }
         return updated;
     }
+
+    @Override
+    public String getName() {
+        return "random-walk";
+    }
 }
