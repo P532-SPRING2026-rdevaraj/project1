@@ -1,4 +1,4 @@
-# TradeSimulator v1.0
+# TradeSimulator
 
 A paper-trading platform built for CSCI-P532 (Spring 2026).
 Analysts can place buy/sell orders, monitor a live portfolio, and receive notifications when orders execute.
@@ -6,10 +6,13 @@ Analysts can place buy/sell orders, monitor a live portfolio, and receive notifi
 ---
 
 ## Live Demo
-**[https://tradesimulator-7rir.onrender.com](https://tradesimulator-7rir.onrender.com)**
 
+| Service | URL |
+|---|---|
+| **Backend (Render)** | [https://tradesimulator-7rir.onrender.com](https://tradesimulator-7rir.onrender.com) |
+| **Frontend (GitHub Pages)** | [https://rohithgowdadevaraju.github.io/Project1/](https://rohithgowdadevaraju.github.io/Project1/) |
 
-**Note:** Free-tier Render services spin down after 15 minutes of inactivity and take up to 60 seconds to cold-start.
+> Free-tier Render services spin down after 15 minutes of inactivity and take up to 60 seconds to cold-start.
 
 ---
 
@@ -47,15 +50,25 @@ Test reports are written to `target/surefire-reports/`.
 
 ---
 
+## Features (Week 2)
+
+- **3 pricing algorithms** — Random Walk, Mean Reversion, Trend Following; switchable from the UI at runtime
+- **Multi-channel notifications** — Console, Email, SMS, Dashboard; configurable per user
+- **Multiple users** — Alice, Bob, Charlie each with independent portfolio, order book, trade history, and notification preferences
+- **Market + limit orders** — limit orders evaluated automatically on every price tick
+- **Live price feed** — prices update every 5 seconds
+
+---
+
 ## Design Patterns
 
-| Pattern | Location | Future change protected |
-|---------|----------|-------------------------|
-| **Strategy** | `PriceUpdateStrategy` interface + `RandomWalkStrategy` | Swap pricing algorithms (e.g. add `MeanReversionStrategy`) without touching `MarketFeed` |
-| **Observer** | `PriceObserver` interface; `MarketFeed` (subject) + `OrderService` (observer) | New consumers (risk engine, analytics) register without modifying `MarketFeed` |
-| **Decorator** | `NotificationDecorator` + `DashboardNotificationDecorator` wrapping `ConsoleNotificationService` | Stack SMS/email channels without modifying existing notifiers |
-| **Factory** | `OrderFactory` | New order types (StopLoss, etc.) added in one place; callers unchanged |
-| **Singleton** | `Portfolio`, `MarketFeed`, `OrderService` as Spring `@Service` beans | Application-scoped state has exactly one instance; avoids inconsistent portfolio state |
+| Pattern | Location | Change protected against |
+|---|---|---|
+| **Strategy** | `PriceUpdateStrategy` + `RandomWalkStrategy`, `MeanReversionStrategy`, `TrendFollowingStrategy` | Add new pricing models without touching `MarketFeed` |
+| **Observer** | `PriceObserver` interface; `MarketFeed` (subject) + `UserRegistry` (observer) | Add new price consumers without modifying `MarketFeed` |
+| **Decorator** | `NotificationDecorator` + `Email/Sms/DashboardNotificationDecorator` | Stack notification channels without modifying existing notifiers |
+| **Factory** | `OrderFactory` + `DefaultOrderFactory` | Add new order types in one place; callers unchanged |
+| **Singleton** | `MarketFeed`, `UserRegistry` as Spring `@Service` beans | Single source of truth for prices and user state |
 
 ---
 
@@ -63,14 +76,14 @@ Test reports are written to `target/surefire-reports/`.
 
 ```
 MarketFeed (Singleton, Observable)
-  ├── PriceUpdateStrategy (Strategy) ← RandomWalkStrategy
-  └── notifies → PriceObserver implementations
-                   └── OrderService (evaluates pending LimitOrders)
-                         ├── OrderFactory (Factory) → MarketOrder / LimitOrder
-                         ├── Portfolio (Singleton) — cash + holdings + trade history
-                         └── NotificationService (Decorator chain)
-                               ConsoleNotificationService
-                               └── DashboardNotificationDecorator
+  ├── PriceUpdateStrategy (Strategy) ← RandomWalk / MeanReversion / TrendFollowing
+  └── notifies → PriceObserver
+                   └── UserRegistry (Singleton)
+                         └── User × 3 (alice, bob, charlie)
+                               ├── Portfolio — cash + holdings + trade history
+                               ├── pending orders: List<Order>  ← OrderFactory
+                               └── NotificationService (Decorator chain)
+                                     Console → [Email] → [SMS] → Dashboard
 ```
 
 ---
@@ -83,17 +96,19 @@ GitHub Actions workflow at [`.github/workflows/ci.yml`](.github/workflows/ci.yml
 2. **build** — packages the fat JAR, builds the Docker image
 3. **deploy** — triggers Render deploy hook (main branch only)
 
-The Render deploy hook URL is stored as the GitHub secret `RENDER_DEPLOY_HOOK`.
+Frontend deployed separately via [`.github/workflows/frontend.yml`](.github/workflows/frontend.yml) to GitHub Pages.
+
+Secrets required: `RENDER_DEPLOY_HOOK`, `VITE_API_BASE_URL`
 
 ---
 
 ## Technology Stack
 
 - Java 17 + Spring Boot 3.2
-- Plain HTML/CSS/JavaScript frontend (served as static resource)
+- React 18 + Vite (frontend)
 - In-memory persistence (no database)
 - Maven build tool
 - Docker (multi-stage build)
-- JUnit 5 + Mockito for unit tests
+- JUnit 5 + Mockito (42 unit tests)
 - GitHub Actions for CI/CD
-- Render.com for deployment
+- Render.com (backend) + GitHub Pages (frontend)
