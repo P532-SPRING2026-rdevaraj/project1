@@ -10,12 +10,10 @@ import java.util.Random;
  * Concrete Strategy: mean-reversion pricing.
  * Each price drifts back toward a moving average of its recent values.
  * Stocks that have moved far from their mean experience a stronger pull.
- *
- * Random is injected so tests can supply a seeded instance for deterministic behaviour.
  */
 public class MeanReversionStrategy implements PriceUpdateStrategy {
 
-    private static final int   WINDOW      = 10;
+    private static final int    WINDOW     = 10;
     private static final double REVERSION  = 0.30;  // 30% of deviation pulled back per tick
     private static final double NOISE      = 0.005; // ±0.5% random noise
     private static final double MAX_CHANGE = 0.03;  // cap at ±3%
@@ -39,8 +37,8 @@ public class MeanReversionStrategy implements PriceUpdateStrategy {
             if (hist.size() > WINDOW) hist.remove(0);
 
             double mean      = hist.stream().mapToDouble(Double::doubleValue).average().orElse(price);
-            double deviation = (price - mean) / mean;           // positive = above mean
-            double pull      = -deviation * REVERSION;          // pull toward mean
+            double deviation = (price - mean) / mean;
+            double pull      = -deviation * REVERSION;
             double noise     = (random.nextDouble() * 2 - 1) * NOISE;
             double change    = Math.max(-MAX_CHANGE, Math.min(MAX_CHANGE, pull + noise));
 

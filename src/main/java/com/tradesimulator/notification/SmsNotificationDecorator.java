@@ -4,11 +4,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Decorator that sends a mock SMS notification in addition to delegating
- * to the wrapped NotificationService.
- *
- * "Mock" means the SMS is logged to the console rather than sent via a carrier gateway.
- * Swap for a real SmsGateway without touching any other class.
+ * Decorator that sends a mock SMS notification (logged to console)
+ * in addition to delegating to the wrapped NotificationService.
  */
 public class SmsNotificationDecorator extends NotificationDecorator {
 
@@ -24,7 +21,6 @@ public class SmsNotificationDecorator extends NotificationDecorator {
     @Override
     public void notify(String message) {
         super.notify(message);
-        // Truncate to 160 chars — typical SMS limit
         String sms = message.length() > 160 ? message.substring(0, 157) + "..." : message;
         log.info("[SMS] To: {} | {}", phoneNumber, sms);
     }

@@ -4,11 +4,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Decorator that sends a mock email notification in addition to delegating
- * to the wrapped NotificationService.
- *
- * "Mock" means the email is logged to the console rather than delivered via SMTP.
- * Swap for a real EmailSender without touching any other class.
+ * Decorator that sends a mock email notification (logged to console)
+ * in addition to delegating to the wrapped NotificationService.
  */
 public class EmailNotificationDecorator extends NotificationDecorator {
 

@@ -8,8 +8,6 @@ import java.util.Random;
  * Concrete Strategy: trend-following pricing.
  * Each price continues in the direction of its recent momentum.
  * Recent gains make further gains more likely; recent losses deepen.
- *
- * Random is injected so tests can supply a seeded instance for deterministic behaviour.
  */
 public class TrendFollowingStrategy implements PriceUpdateStrategy {
 
@@ -34,7 +32,7 @@ public class TrendFollowingStrategy implements PriceUpdateStrategy {
             double momentum = 0.0;
             if (previousPrices.containsKey(ticker)) {
                 double prev = previousPrices.get(ticker);
-                momentum = (price - prev) / prev;  // fractional move since last tick
+                momentum = (price - prev) / prev;
             }
 
             double trend  = momentum * MOMENTUM_FACTOR;

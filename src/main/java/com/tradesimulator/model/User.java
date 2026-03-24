@@ -14,10 +14,6 @@ import java.util.concurrent.CopyOnWriteArrayList;
 /**
  * Represents an analyst user with their own isolated portfolio, order book,
  * notification preferences, and dashboard message feed.
- *
- * Each User owns a Portfolio instance and a pluggable NotificationService chain
- * (Decorator pattern). Calling rebuildNotificationChain() rewires the chain
- * without touching any other class.
  */
 public class User {
 
@@ -26,7 +22,6 @@ public class User {
     private final Portfolio portfolio;
     private final List<Order> pendingOrders;
 
-    /** The outermost decorator — always a Dashboard so the UI can poll messages. */
     private DashboardNotificationDecorator notificationService;
     private Set<String> enabledChannels;
 
@@ -36,14 +31,12 @@ public class User {
         this.portfolio       = new Portfolio();
         this.pendingOrders   = new CopyOnWriteArrayList<>();
         this.enabledChannels = Set.of("console", "dashboard");
-        // Default chain: Console → Dashboard
         this.notificationService = new DashboardNotificationDecorator(console);
     }
 
     /**
      * Rebuilds the notification decorator chain to match the requested channels.
-     * Always wraps with DashboardNotificationDecorator at the top so the UI still works.
-     * Chain (inner→outer): Console [→ Email] [→ SMS] → Dashboard
+     * Chain order (inner to outer): Console [→ Email] [→ SMS] → Dashboard
      */
     public void rebuildNotificationChain(ConsoleNotificationService console, Set<String> channels) {
         this.enabledChannels = channels;
@@ -57,13 +50,11 @@ public class User {
         this.notificationService = new DashboardNotificationDecorator(chain);
     }
 
-    // --- Accessors ---
-
-    public String getId()                              { return id; }
-    public String getName()                            { return name; }
-    public Portfolio getPortfolio()                    { return portfolio; }
-    public List<Order> getPendingOrders()              { return pendingOrders; }
-    public NotificationService getNotificationService(){ return notificationService; }
-    public List<String> getDashboardMessages()         { return notificationService.getDashboardMessages(); }
-    public Set<String> getEnabledChannels()            { return enabledChannels; }
+    public String getId()                               { return id; }
+    public String getName()                             { return name; }
+    public Portfolio getPortfolio()                     { return portfolio; }
+    public List<Order> getPendingOrders()               { return pendingOrders; }
+    public NotificationService getNotificationService() { return notificationService; }
+    public List<String> getDashboardMessages()          { return notificationService.getDashboardMessages(); }
+    public Set<String> getEnabledChannels()             { return enabledChannels; }
 }

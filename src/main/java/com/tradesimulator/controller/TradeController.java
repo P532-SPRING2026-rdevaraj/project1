@@ -22,13 +22,7 @@ import java.util.stream.Collectors;
 
 /**
  * REST controller for the TradeSimulator API.
- *
- * All trading endpoints accept a ?userId= query parameter (default: "alice")
- * so each analyst sees their own portfolio, orders, trades, and notifications.
- *
- * Strategy switching (Change 1) is handled via GET/POST /api/strategy.
- * Notification channel configuration (Change 2) is via POST /api/notifications/channels.
- * User listing (Change 3) is via GET /api/users.
+ * All endpoints accept a ?userId= query parameter (default: "alice").
  */
 @RestController
 @RequestMapping("/api")
@@ -49,14 +43,10 @@ public class TradeController {
         this.random       = random;
     }
 
-    // ── Market prices ────────────────────────────────────────────────────────
-
     @GetMapping("/prices")
     public Map<String, Double> getPrices() {
         return marketFeed.getPrices();
     }
-
-    // ── Pricing strategy (Change 1) ──────────────────────────────────────────
 
     @GetMapping("/strategy")
     public Map<String, String> getStrategy() {
@@ -66,15 +56,13 @@ public class TradeController {
     @PostMapping("/strategy")
     public Map<String, String> setStrategy(@RequestParam String name) {
         switch (name) {
-            case "random-walk"    -> marketFeed.setStrategy(new RandomWalkStrategy(random));
-            case "mean-reversion" -> marketFeed.setStrategy(new MeanReversionStrategy(random));
-            case "trend-following"-> marketFeed.setStrategy(new TrendFollowingStrategy(random));
+            case "random-walk"     -> marketFeed.setStrategy(new RandomWalkStrategy(random));
+            case "mean-reversion"  -> marketFeed.setStrategy(new MeanReversionStrategy(random));
+            case "trend-following" -> marketFeed.setStrategy(new TrendFollowingStrategy(random));
             default -> throw new IllegalArgumentException("Unknown strategy: " + name);
         }
         return Map.of("strategy", marketFeed.getStrategy().getName());
     }
-
-    // ── Users (Change 3) ─────────────────────────────────────────────────────
 
     @GetMapping("/users")
     public List<Map<String, Object>> getUsers() {
@@ -88,8 +76,6 @@ public class TradeController {
                 .collect(Collectors.toList());
     }
 
-    // ── Portfolio ────────────────────────────────────────────────────────────
-
     @GetMapping("/portfolio")
     public Map<String, Object> getPortfolio(@RequestParam(defaultValue = DEFAULT_USER) String userId) {
         User user = userRegistry.getUser(userId);
@@ -100,14 +86,10 @@ public class TradeController {
         return result;
     }
 
-    // ── Trade history ────────────────────────────────────────────────────────
-
     @GetMapping("/trades")
     public List<Trade> getTrades(@RequestParam(defaultValue = DEFAULT_USER) String userId) {
         return userRegistry.getUser(userId).getPortfolio().getTradeHistory();
     }
-
-    // ── Orders ───────────────────────────────────────────────────────────────
 
     @GetMapping("/orders/pending")
     public List<Order> getPendingOrders(@RequestParam(defaultValue = DEFAULT_USER) String userId) {
@@ -133,8 +115,6 @@ public class TradeController {
             return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
         }
     }
-
-    // ── Notifications (Change 2 + 3) ─────────────────────────────────────────
 
     @GetMapping("/notifications")
     public List<String> getNotifications(@RequestParam(defaultValue = DEFAULT_USER) String userId) {

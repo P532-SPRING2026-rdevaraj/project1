@@ -6,9 +6,7 @@ import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 /**
- * Global CORS configuration.
- * Allows the frontend (GitHub Pages) to call the backend (Render) cross-origin.
- * The allowed origin pattern covers any GitHub Pages URL for this project.
+ * Global CORS configuration allowing the GitHub Pages frontend to call the Render backend.
  */
 @Configuration
 public class CorsConfig {

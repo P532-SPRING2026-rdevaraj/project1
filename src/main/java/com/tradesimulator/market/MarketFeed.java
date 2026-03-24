@@ -11,11 +11,9 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Singleton (Spring @Service = singleton scope) that acts as the Observable in the Observer pattern.
+ * Singleton (Spring @Service) acting as the Observable in the Observer pattern.
  * Holds current stock prices and notifies registered PriceObservers every 5 seconds.
- *
  * The pricing algorithm is pluggable via PriceUpdateStrategy (Strategy pattern).
- * Swap strategies at runtime without modifying this class.
  */
 @Service
 public class MarketFeed {

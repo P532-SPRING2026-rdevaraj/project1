@@ -19,14 +19,8 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * Singleton (Spring @Service) that owns all three analyst users and acts as the
- * single PriceObserver responsible for evaluating each user's pending limit orders.
- *
- * Observer pattern: registered with MarketFeed at startup; onPriceUpdate() iterates
- * every user's order book on each price tick.
- *
- * Singleton pattern: exactly one UserRegistry exists; all per-user state lives inside it,
- * keyed by userId — so adding a 4th user requires only adding one entry to the map here.
+ * Singleton (Spring @Service) managing all analyst users.
+ * Implements PriceObserver to evaluate each user's pending limit orders on every price tick.
  */
 @Service
 public class UserRegistry implements PriceObserver {
@@ -48,8 +42,6 @@ public class UserRegistry implements PriceObserver {
         marketFeed.addObserver(this);
     }
 
-    // ── PriceObserver ────────────────────────────────────────────────────────
-
     @Override
     public void onPriceUpdate(Map<String, Double> prices) {
         for (User user : users.values()) {
@@ -67,8 +59,6 @@ public class UserRegistry implements PriceObserver {
         }
     }
 
-    // ── Order placement ──────────────────────────────────────────────────────
-
     public Order placeOrder(String userId, String kind, String ticker,
                             OrderType orderType, int quantity, double limitPrice,
                             Map<String, Double> currentPrices) {
@@ -84,13 +74,9 @@ public class UserRegistry implements PriceObserver {
         return order;
     }
 
-    // ── Notification channel configuration ──────────────────────────────────
-
     public void setNotificationChannels(String userId, Set<String> channels) {
         getUser(userId).rebuildNotificationChain(consoleService, channels);
     }
-
-    // ── Accessors ────────────────────────────────────────────────────────────
 
     public User getUser(String userId) {
         User u = users.get(userId);
@@ -101,8 +87,6 @@ public class UserRegistry implements PriceObserver {
     public Collection<User> getAllUsers() {
         return users.values();
     }
-
-    // ── Private helpers ──────────────────────────────────────────────────────
 
     private void executeOrderForUser(User user, Order order, double price) {
         Portfolio portfolio = user.getPortfolio();

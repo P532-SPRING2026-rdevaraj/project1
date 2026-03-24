@@ -5,11 +5,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 
 /**
- * Spring configuration that wires the notification chain:
- * ConsoleNotificationService -> DashboardNotificationDecorator
- *
- * To add SMS in Week 2, wrap dashboardDecorator with SmsNotificationDecorator here —
- * no other class needs to change.
+ * Wires the default notification chain: ConsoleNotificationService → DashboardNotificationDecorator.
  */
 @Configuration
 public class NotificationConfig {

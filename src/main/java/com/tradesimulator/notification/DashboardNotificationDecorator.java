@@ -5,11 +5,8 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * Decorator that captures notifications in an in-memory list so the UI can
- * display them in a notification panel, in addition to delegating to the wrapped notifier.
- *
- * In Week 2 an SmsNotificationDecorator or EmailNotificationDecorator can be stacked
- * on top without touching this class.
+ * Decorator that captures notifications in an in-memory list for UI display,
+ * in addition to delegating to the wrapped notifier.
  */
 public class DashboardNotificationDecorator extends NotificationDecorator {
 
