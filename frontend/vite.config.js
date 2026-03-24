@@ -9,7 +9,7 @@ export default defineConfig({
   plugins: [react()],
   // Base path for GitHub Pages: /Project1/ (repo name).
   // Leave as '/' for local dev and the Spring Boot JAR build.
-  base: isGhPages ? '/Project1/' : '/',
+  base: isGhPages ? '/project1/' : '/',
   build: {
     outDir: isGhPages ? 'dist' : '../src/main/resources/static',
     emptyOutDir: true,
