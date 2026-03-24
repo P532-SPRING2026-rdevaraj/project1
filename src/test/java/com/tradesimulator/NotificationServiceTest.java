@@ -2,7 +2,9 @@ package com.tradesimulator;
 
 import com.tradesimulator.notification.ConsoleNotificationService;
 import com.tradesimulator.notification.DashboardNotificationDecorator;
+import com.tradesimulator.notification.EmailNotificationDecorator;
 import com.tradesimulator.notification.NotificationService;
+import com.tradesimulator.notification.SmsNotificationDecorator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -16,8 +18,7 @@ import static org.mockito.Mockito.*;
 
 /**
  * Tests for the Decorator pattern — NotificationService chain.
- * Uses a mock to verify delegation and a DashboardNotificationDecorator
- * to verify the in-memory capture behaviour.
+ * Week 2: verifies that a decorated chain (Email + SMS + Dashboard) fires all wrapped notifiers.
  */
 @ExtendWith(MockitoExtension.class)
 class NotificationServiceTest {
@@ -93,5 +94,54 @@ class NotificationServiceTest {
 
         // Assert
         verify(mockNotificationService).notify(rejectionMsg);
+    }
+
+    // ── Week 2: full decorated chain fires all notifiers ─────────────────────
+
+    @Test
+    void fullDecoratedChainEmailSmsDashboardAllFire() {
+        // Arrange — build chain: Console → Email → SMS → Dashboard
+        NotificationService mockInner = mock(NotificationService.class);
+        EmailNotificationDecorator email = new EmailNotificationDecorator(mockInner, "test@example.com");
+        SmsNotificationDecorator   sms   = new SmsNotificationDecorator(email, "+15551234");
+        DashboardNotificationDecorator dashboard = new DashboardNotificationDecorator(sms);
+        String message = "Order EXECUTED: BUY 1 shares of MSFT @ $380.00";
+
+        // Act
+        dashboard.notify(message);
+
+        // Assert — innermost mock was reached (Console at bottom of chain)
+        verify(mockInner, times(1)).notify(message);
+        // Dashboard captured the message
+        assertEquals(1, dashboard.getDashboardMessages().size());
+        assertEquals(message, dashboard.getDashboardMessages().get(0));
+    }
+
+    @Test
+    void emailDecoratorDelegatesToWrappedService() {
+        // Arrange
+        EmailNotificationDecorator emailDecorator =
+                new EmailNotificationDecorator(mockNotificationService, "user@tradesim.io");
+        String message = "Test notification";
+
+        // Act
+        emailDecorator.notify(message);
+
+        // Assert — delegation happened
+        verify(mockNotificationService, times(1)).notify(message);
+    }
+
+    @Test
+    void smsDecoratorDelegatesToWrappedService() {
+        // Arrange
+        SmsNotificationDecorator smsDecorator =
+                new SmsNotificationDecorator(mockNotificationService, "+15550000");
+        String message = "Test notification";
+
+        // Act
+        smsDecorator.notify(message);
+
+        // Assert
+        verify(mockNotificationService, times(1)).notify(message);
     }
 }
