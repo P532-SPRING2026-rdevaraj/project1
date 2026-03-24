@@ -7,26 +7,65 @@ import PendingOrders from './components/PendingOrders'
 import TradeHistory from './components/TradeHistory'
 import Notifications from './components/Notifications'
 import SellModal from './components/SellModal'
+import StrategySelector from './components/StrategySelector'
+
+// In production the env var points to the Render backend URL.
+// In development it is empty and Vite's proxy forwards /api to localhost:8080.
+const API_BASE = import.meta.env.VITE_API_BASE_URL || ''
+
+export function apiUrl(path) {
+  return `${API_BASE}${path}`
+}
 
 export default function App() {
-  const [prices, setPrices] = useState({})
-  const [prevPrices, setPrevPrices] = useState({})
-  const prevPricesRef = useRef({})
-  const [portfolio, setPortfolio] = useState({ cash: 0, holdings: {}, totalValue: 0 })
+  const [prices, setPrices]               = useState({})
+  const [prevPrices, setPrevPrices]       = useState({})
+  const prevPricesRef                     = useRef({})
+  const [portfolio, setPortfolio]         = useState({ cash: 0, holdings: {}, totalValue: 0 })
   const [pendingOrders, setPendingOrders] = useState([])
-  const [trades, setTrades] = useState([])
+  const [trades, setTrades]               = useState([])
   const [notifications, setNotifications] = useState([])
-  const [sellTarget, setSellTarget] = useState(null)
-  const [lastRefresh, setLastRefresh] = useState(null)
+  const [sellTarget, setSellTarget]       = useState(null)
+  const [lastRefresh, setLastRefresh]     = useState(null)
+
+  // Week 2 state
+  const [users, setUsers]         = useState([])
+  const [userId, setUserId]       = useState('alice')
+  const [strategy, setStrategy]   = useState('random-walk')
+  const [channels, setChannels]   = useState(new Set(['console', 'dashboard']))
+
+  // Fetch users list once on mount
+  useEffect(() => {
+    fetch(apiUrl('/api/users'))
+      .then(r => r.json())
+      .then(setUsers)
+      .catch(console.error)
+  }, [])
+
+  // Fetch current strategy once on mount
+  useEffect(() => {
+    fetch(apiUrl('/api/strategy'))
+      .then(r => r.json())
+      .then(d => setStrategy(d.strategy))
+      .catch(console.error)
+  }, [])
+
+  // Fetch notification channels whenever userId changes
+  useEffect(() => {
+    fetch(apiUrl(`/api/notifications/channels?userId=${userId}`))
+      .then(r => r.json())
+      .then(d => setChannels(new Set(d.channels)))
+      .catch(console.error)
+  }, [userId])
 
   const fetchAll = useCallback(async () => {
     try {
       const [pricesRes, portRes, ordersRes, tradesRes, notifsRes] = await Promise.all([
-        fetch('/api/prices'),
-        fetch('/api/portfolio'),
-        fetch('/api/orders/pending'),
-        fetch('/api/trades'),
-        fetch('/api/notifications'),
+        fetch(apiUrl('/api/prices')),
+        fetch(apiUrl(`/api/portfolio?userId=${userId}`)),
+        fetch(apiUrl(`/api/orders/pending?userId=${userId}`)),
+        fetch(apiUrl(`/api/trades?userId=${userId}`)),
+        fetch(apiUrl(`/api/notifications?userId=${userId}`)),
       ])
       const [newPrices, newPort, newOrders, newTrades, newNotifs] = await Promise.all([
         pricesRes.json(),
@@ -47,7 +86,7 @@ export default function App() {
     } catch (e) {
       console.error('Fetch error:', e)
     }
-  }, [])
+  }, [userId])
 
   useEffect(() => {
     fetchAll()
@@ -56,7 +95,7 @@ export default function App() {
   }, [fetchAll])
 
   const placeOrder = async (body) => {
-    const res = await fetch('/api/orders', {
+    const res = await fetch(apiUrl(`/api/orders?userId=${userId}`), {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(body),
@@ -66,9 +105,34 @@ export default function App() {
     return { ok: res.ok, data }
   }
 
+  const switchStrategy = async (name) => {
+    const res = await fetch(apiUrl(`/api/strategy?name=${name}`), { method: 'POST' })
+    if (res.ok) {
+      const d = await res.json()
+      setStrategy(d.strategy)
+    }
+  }
+
+  const updateChannels = async (newChannels) => {
+    const res = await fetch(apiUrl(`/api/notifications/channels?userId=${userId}`), {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify([...newChannels]),
+    })
+    if (res.ok) {
+      const d = await res.json()
+      setChannels(new Set(d.channels))
+    }
+  }
+
   return (
     <div className="app">
-      <Header lastRefresh={lastRefresh} />
+      <Header
+        lastRefresh={lastRefresh}
+        users={users}
+        userId={userId}
+        onUserChange={setUserId}
+      />
       <div className="layout">
 
         <Portfolio
@@ -79,7 +143,16 @@ export default function App() {
         <MarketPrices prices={prices} prevPrices={prevPrices} />
 
         <PlaceOrder tickers={Object.keys(prices)} onOrder={placeOrder} />
-        <Notifications notifications={notifications} />
+
+        <div className="card">
+          <StrategySelector strategy={strategy} onSwitch={switchStrategy} />
+        </div>
+
+        <Notifications
+          notifications={notifications}
+          channels={channels}
+          onChannelChange={updateChannels}
+        />
 
         <div className="full-row">
           <PendingOrders orders={pendingOrders} />
