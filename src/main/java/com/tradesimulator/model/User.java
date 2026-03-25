@@ -22,7 +22,8 @@ public class User {
     private final Portfolio portfolio;
     private final List<Order> pendingOrders;
 
-    private DashboardNotificationDecorator notificationService;
+    private DashboardNotificationDecorator dashboard;
+    private NotificationService outerChain;
     private Set<String> enabledChannels;
 
     public User(String id, String name, ConsoleNotificationService console) {
@@ -31,30 +32,34 @@ public class User {
         this.portfolio       = new Portfolio();
         this.pendingOrders   = new CopyOnWriteArrayList<>();
         this.enabledChannels = Set.of("console", "dashboard");
-        this.notificationService = new DashboardNotificationDecorator(console);
+        this.dashboard       = new DashboardNotificationDecorator(console);
+        this.outerChain      = this.dashboard;
     }
 
     /**
      * Rebuilds the notification decorator chain to match the requested channels.
-     * Chain order (inner to outer): Console [→ Email] [→ SMS] → Dashboard
+     * Chain order (inner to outer): Console → Dashboard [→ Email] [→ SMS]
+     * Email/SMS also push their formatted mock messages directly to the dashboard list.
      */
     public void rebuildNotificationChain(ConsoleNotificationService console, Set<String> channels) {
         this.enabledChannels = channels;
-        NotificationService chain = console;
+        DashboardNotificationDecorator newDashboard = new DashboardNotificationDecorator(console);
+        NotificationService chain = newDashboard;
         if (channels.contains("email")) {
-            chain = new EmailNotificationDecorator(chain, id + "@tradesim.io");
+            chain = new EmailNotificationDecorator(chain, id + "@tradesim.io", newDashboard);
         }
         if (channels.contains("sms")) {
-            chain = new SmsNotificationDecorator(chain, "+1-555-" + id.hashCode() % 10000);
+            chain = new SmsNotificationDecorator(chain, "+1-555-" + Math.abs(id.hashCode() % 10000), newDashboard);
         }
-        this.notificationService = new DashboardNotificationDecorator(chain);
+        this.dashboard  = newDashboard;
+        this.outerChain = chain;
     }
 
     public String getId()                               { return id; }
     public String getName()                             { return name; }
     public Portfolio getPortfolio()                     { return portfolio; }
     public List<Order> getPendingOrders()               { return pendingOrders; }
-    public NotificationService getNotificationService() { return notificationService; }
-    public List<String> getDashboardMessages()          { return notificationService.getDashboardMessages(); }
+    public NotificationService getNotificationService() { return outerChain; }
+    public List<String> getDashboardMessages()          { return dashboard.getDashboardMessages(); }
     public Set<String> getEnabledChannels()             { return enabledChannels; }
 }

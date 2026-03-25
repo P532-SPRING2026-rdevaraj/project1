@@ -144,7 +144,7 @@ export default function App() {
 
         <PlaceOrder tickers={Object.keys(prices)} onOrder={placeOrder} />
 
-        <div className="card">
+        <div className="card strategy-card">
           <StrategySelector strategy={strategy} onSwitch={switchStrategy} />
         </div>
 
@@ -154,9 +154,7 @@ export default function App() {
           onChannelChange={updateChannels}
         />
 
-        <div className="full-row">
-          <PendingOrders orders={pendingOrders} />
-        </div>
+        <PendingOrders orders={pendingOrders} />
 
         <div className="full-row">
           <TradeHistory trades={trades} />

@@ -482,6 +482,7 @@ body {
 .user-select:focus { outline: 2px solid var(--blue); }
 
 /* Strategy selector (Change 1) */
+.strategy-card { }
 .strategy-list { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 8px; }
 .strategy-btn {
   padding: 5px 12px;

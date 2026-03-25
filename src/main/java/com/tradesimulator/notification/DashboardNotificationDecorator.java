@@ -26,6 +26,10 @@ public class DashboardNotificationDecorator extends NotificationDecorator {
         return Collections.unmodifiableList(dashboardMessages);
     }
 
+    public void addMessage(String message) {
+        dashboardMessages.add(message);
+    }
+
     public void clearMessages() {
         dashboardMessages.clear();
     }

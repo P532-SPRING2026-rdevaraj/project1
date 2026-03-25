@@ -12,15 +12,24 @@ public class EmailNotificationDecorator extends NotificationDecorator {
     private static final Logger log = LoggerFactory.getLogger(EmailNotificationDecorator.class);
 
     private final String recipientAddress;
+    private final DashboardNotificationDecorator dashboard;
 
     public EmailNotificationDecorator(NotificationService wrapped, String recipientAddress) {
+        this(wrapped, recipientAddress, null);
+    }
+
+    public EmailNotificationDecorator(NotificationService wrapped, String recipientAddress,
+                                      DashboardNotificationDecorator dashboard) {
         super(wrapped);
         this.recipientAddress = recipientAddress;
+        this.dashboard = dashboard;
     }
 
     @Override
     public void notify(String message) {
         super.notify(message);
-        log.info("[EMAIL] To: {} | Subject: Trade Notification | Body: {}", recipientAddress, message);
+        String formatted = "[EMAIL] To: " + recipientAddress + " | Subject: Trade Notification | Body: " + message;
+        log.info(formatted);
+        if (dashboard != null) dashboard.addMessage(formatted);
     }
 }
